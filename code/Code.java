@@ -16,7 +16,7 @@ public class Code extends JFrame implements GLEventListener {
 	private GLCanvas myCanvas;
 	private int renderingProgram;
 	private int vao[] = new int[1];
-	private int vbo[] = new int[8];
+	private int vbo[] = new int[10];
 	private float cameraX, cameraY, cameraZ;
 	private float cubeLocX, cubeLocY, cubeLocZ;
 	private float pyrLocX, pyrLocY, pyrLocZ;
@@ -50,6 +50,12 @@ public class Code extends JFrame implements GLEventListener {
 
 	// general texture
 	private int genTexture;
+
+	// texture for tetra
+	private int tetraTexture;
+
+	// texture for cube
+	private int cubeTexture;
 
 	public Code() {
 		setTitle("Chapter 4 - program 3");
@@ -109,6 +115,16 @@ public class Code extends JFrame implements GLEventListener {
 		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(0);
 
+		// bind the texture coords for cube
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(1);
+
+		// bind the texture
+		gl.glActiveTexture(GL_TEXTURE0);
+		gl.glBindTexture(GL_TEXTURE_2D, cubeTexture);
+		gl.glUniform1i(gl.glGetUniformLocation(renderingProgram, "texture0"), 0);
+
 		gl.glEnable(GL_DEPTH_TEST);
 		gl.glDepthFunc(GL_LEQUAL);
 
@@ -118,7 +134,7 @@ public class Code extends JFrame implements GLEventListener {
 		mMat.translation(tetraLocX, tetraLocY, tetraLocZ);
 
 		// scales the traingle to be bigger
-		mMat.scale(2.5f, 2.5f, 2.5f);
+		// mMat.scale(1.3f, 1.3f, 1.3f);
 
 		// make the tetrahedron do a spinning motion
 		mMat.rotateY((float) Math.toRadians(45.0f * tf));
@@ -130,9 +146,19 @@ public class Code extends JFrame implements GLEventListener {
 		gl.glUniformMatrix4fv(mvLoc, 1, false, mvMat.get(vals));
 		gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals));
 
-		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
 		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(0);
+
+		// bind the texture coords for pyramid
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+		gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(1);
+
+		gl.glActiveTexture(GL_TEXTURE0);
+		gl.glBindTexture(GL_TEXTURE_2D, tetraTexture);
+		gl.glUniform1i(gl.glGetUniformLocation(renderingProgram, "texture0"), 0);
+		// gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
 		gl.glEnable(GL_DEPTH_TEST);
 		gl.glDepthFunc(GL_LEQUAL);
@@ -149,11 +175,11 @@ public class Code extends JFrame implements GLEventListener {
 		gl.glUniformMatrix4fv(mvLoc, 1, false, mvMat.get(vals));
 		gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals));
 
-		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(0);
 
-		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
 		gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(1);
 
@@ -176,17 +202,18 @@ public class Code extends JFrame implements GLEventListener {
 		gl.glUniformMatrix4fv(mvLoc, 1, false, mvMat.get(vals));
 		gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals));
 
-		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[7]);
 		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(0);
 
-		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[8]);
 		gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(1);
 
-		// assign the texture to the tree
+		// set the texture
 		gl.glActiveTexture(GL_TEXTURE0);
 		gl.glBindTexture(GL_TEXTURE_2D, treeTexture);
+		gl.glUniform1i(gl.glGetUniformLocation(renderingProgram, "texture0"), 0);
 
 		gl.glEnable(GL_DEPTH_TEST);
 		gl.glDepthFunc(GL_LEQUAL);
@@ -234,6 +261,9 @@ public class Code extends JFrame implements GLEventListener {
 		// texture for tree
 		cowTexture = Utils.loadTexture("furCow.jpg");
 		genTexture = Utils.loadTexture("green.jpg");
+		tetraTexture = Utils.loadTexture("brick1.jpg");
+		cubeTexture = Utils.loadTexture("alien.jpg");
+		treeTexture = Utils.loadTexture("tree.jpg");
 	}
 
 	private void setupVertices() {
@@ -252,11 +282,34 @@ public class Code extends JFrame implements GLEventListener {
 				1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f
 		};
 
+		// texture coords for cube
+		float[] cubeTexCoords = { 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			
+	
+		};
+
 		// vertice postions for triangular pyramid
-		float[] tetrahedronPositions = { 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, // front
-				0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, // right
-				0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, // left
-				-1.0f, 0.0f, 1.0f, 1, .0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f // bottom
+		float[] tetrahedronPositions = { 0.0f, 3.0f, 0.0f, -3.0f, 0.0f, 3.0f, 3.0f, 0.0f, 3.0f, // front
+				0.0f, 3.0f, 0.0f, 3.0f, 0.0f, 3.0f, 0.0f, 0.0f, -3.0f, // right
+				0.0f, 3.0f, 0.0f, -3.0f, 0.0f, 3.0f, 0.0f, 0.0f, -3.0f, // left
+				-3.0f, 0.0f, 3.0f, 3.0f, 0.0f, 3.0f, 0.0f, 0.0f, -3.0f // bottom
+		};
+
+		// texture coordinates for pyramid
+		float[] tetrahedronTexCoords = { 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // front
+				0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right
+				0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // left
+				0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f // bottom
 		};
 
 		// float[] tetrahedronPositions = { 0.0f, 1.0f, 0.0f, -1.0f, -1.0f, 1.0f, 1.0f,
@@ -316,45 +369,61 @@ public class Code extends JFrame implements GLEventListener {
 		gl.glGenVertexArrays(vao.length, vao, 0);
 		gl.glBindVertexArray(vao[0]);
 		gl.glGenBuffers(vbo.length, vbo, 0);
-
+		//cube vertices
+		//
 		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 		FloatBuffer cubeBuf = Buffers.newDirectFloatBuffer(
 				cubePositions);
 		gl.glBufferData(GL_ARRAY_BUFFER, cubeBuf.limit() * 4, cubeBuf, GL_STATIC_DRAW);
-
+		//cube tex coords
 		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		FloatBuffer cubeTexBuf = Buffers.newDirectFloatBuffer(
+				cubeTexCoords);
+		gl.glBufferData(GL_ARRAY_BUFFER, cubeTexBuf.limit() * 4, cubeTexBuf, GL_STATIC_DRAW);
+
+		// triangluar pyramid vertices
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
 		FloatBuffer tetBuf = Buffers.newDirectFloatBuffer(
 				tetrahedronPositions);
 		gl.glBufferData(GL_ARRAY_BUFFER, tetBuf.limit() * 4, tetBuf, GL_STATIC_DRAW);
 
+		// traingluar pyramid tex coords
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+		FloatBuffer tetTexBuf = Buffers.newDirectFloatBuffer(
+				tetrahedronTexCoords);
+		gl.glBufferData(GL_ARRAY_BUFFER, tetTexBuf.limit() * 4, tetTexBuf, GL_STATIC_DRAW);
+
 		// set up cow vertices
-		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-		FloatBuffer vertBuf = Buffers
-				.newDirectFloatBuffer(pvalues);
+		//
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
+		FloatBuffer vertBuf = Buffers.newDirectFloatBuffer(
+				pvalues);
 		gl.glBufferData(GL_ARRAY_BUFFER, vertBuf.limit() * 4, vertBuf, GL_STATIC_DRAW);
 
-		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
-		FloatBuffer texBuf = Buffers
-				.newDirectFloatBuffer(tvalues);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+		FloatBuffer texBuf = Buffers.newDirectFloatBuffer(
+				tvalues);
 		gl.glBufferData(GL_ARRAY_BUFFER, texBuf.limit() * 4, texBuf, GL_STATIC_DRAW);
 
-		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-		FloatBuffer normBuf = Buffers
-				.newDirectFloatBuffer(nvalues);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
+		FloatBuffer normBuf = Buffers.newDirectFloatBuffer(
+				nvalues);
 		gl.glBufferData(GL_ARRAY_BUFFER, normBuf.limit() * 4, normBuf, GL_STATIC_DRAW);
 
+
 		// set up tree vertices
-		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+		//
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[7]);
 		FloatBuffer treeVertBuf = Buffers.newDirectFloatBuffer(
 				treePvalues);
 		gl.glBufferData(GL_ARRAY_BUFFER, treeVertBuf.limit() * 4, treeVertBuf, GL_STATIC_DRAW);
 
-		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[8]);
 		FloatBuffer treeTexBuf = Buffers.newDirectFloatBuffer(
 				treeTvalues);
 		gl.glBufferData(GL_ARRAY_BUFFER, treeTexBuf.limit() * 4, treeTexBuf, GL_STATIC_DRAW);
 
-		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[7]);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 		FloatBuffer treeNormBuf = Buffers.newDirectFloatBuffer(
 				treeNvalues);
 		gl.glBufferData(GL_ARRAY_BUFFER, treeNormBuf.limit() * 4, treeNormBuf, GL_STATIC_DRAW);
