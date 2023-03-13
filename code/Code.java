@@ -26,6 +26,7 @@ public class Code extends JFrame implements GLEventListener {
 	private float cowLocX, cowLocY, cowLocZ;
 	private int numObjVertices;
 	private ImportedModel myModel;
+	private int cowTexture;
 
 	// tree variables
 	private float treeLocX, treeLocY, treeLocZ;
@@ -46,6 +47,9 @@ public class Code extends JFrame implements GLEventListener {
 	private double tf;
 	private double startTime;
 	private double elapsedTime;
+
+	// general texture
+	private int genTexture;
 
 	public Code() {
 		setTitle("Chapter 4 - program 3");
@@ -153,6 +157,11 @@ public class Code extends JFrame implements GLEventListener {
 		gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(1);
 
+		// set the texture
+		gl.glActiveTexture(GL_TEXTURE0);
+		gl.glBindTexture(GL_TEXTURE_2D, cowTexture);
+		gl.glUniform1i(gl.glGetUniformLocation(renderingProgram, "texture0"), 0);
+
 		gl.glEnable(GL_DEPTH_TEST);
 		gl.glDepthFunc(GL_LEQUAL);
 		gl.glDrawArrays(GL_TRIANGLES, 0, myModel.getNumVertices());
@@ -206,7 +215,7 @@ public class Code extends JFrame implements GLEventListener {
 		cameraZ = 15.0f;
 
 		cubeLocX = 0.0f;
-		cubeLocY = 3.0f;
+		cubeLocY = 2.3f;
 		cubeLocZ = 0.0f;
 		// tetrahedron vertices
 		tetraLocX = 0.0f;
@@ -223,7 +232,8 @@ public class Code extends JFrame implements GLEventListener {
 		treeLocZ = -6.0f;
 
 		// texture for tree
-		treeTexture = Utils.loadTexture("tree.mtl");
+		cowTexture = Utils.loadTexture("furCow.jpg");
+		genTexture = Utils.loadTexture("green.jpg");
 	}
 
 	private void setupVertices() {
