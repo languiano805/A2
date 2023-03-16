@@ -1,5 +1,8 @@
 package code;
 
+import code.FirstPersonCamera.*;
+import code.Camera3D.*;
+
 import java.nio.*;
 import javax.swing.*;
 import java.lang.Math;
@@ -57,6 +60,30 @@ public class Code extends JFrame implements GLEventListener {
 	// texture for cube
 	private int cubeTexture;
 
+	// increments in the N direction
+	private int nIncrementation = 10;
+
+	// increments int he U direction
+	private int uIncrementation = 10;
+
+	// increments in the V direction
+	private int vIncrementation = 10;
+
+	// camera speed
+	private float angleY = 0.3f;
+	private float angleX = 0.3f;
+
+	// camera rotations
+	private float cameraRotation = 4.0f;
+
+	// camera3D object
+	private Camera3D camera2;
+
+	// new camera object
+	private FirstPersonCamera camera = new FirstPersonCamera(0.0f, 0.0f, 18.0f);
+
+	private float cameraMovement = 0.3f;
+
 	public Code() {
 		setTitle("Chapter 4 - program 3");
 		setSize(600, 600);
@@ -66,6 +93,100 @@ public class Code extends JFrame implements GLEventListener {
 		myCanvas.addGLEventListener(this);
 		this.add(myCanvas);
 		this.setVisible(true);
+
+		// key listerner for w to move forward
+		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
+			public void keyPressed(java.awt.event.KeyEvent e) {
+				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_W) {
+					camera.translate(0.0f, 0.0f, -cameraMovement);
+				}
+			}
+		});
+
+		// key listerner for s to move backward
+		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
+			public void keyPressed(java.awt.event.KeyEvent e) {
+				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_S) {
+					camera.translate(0.0f, 0.0f, cameraMovement);
+				}
+			}
+		});
+
+		// key listerner for a to move left
+		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
+			public void keyPressed(java.awt.event.KeyEvent e) {
+				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_A) {
+					camera.translate(-cameraMovement, 0.0f, 0.0f);
+				}
+			}
+		});
+
+		// key listerner for d to move right
+		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
+			public void keyPressed(java.awt.event.KeyEvent e) {
+				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_D) {
+					camera.translate(cameraMovement, 0.0f, 0.0f);
+				}
+			}
+		});
+
+		// key listerner for e to move up
+		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
+			public void keyPressed(java.awt.event.KeyEvent e) {
+				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_E) {
+					camera.translate(0.0f, cameraMovement, 0.0f);
+				}
+			}
+		});
+
+		// key listener for q to move down
+		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
+			public void keyPressed(java.awt.event.KeyEvent e) {
+				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_Q) {
+					camera.translate(0.0f, -cameraMovement, 0.0f);
+				}
+			}
+		});
+
+		// key listener for up arrow to rotate camera left
+		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
+			public void keyPressed(java.awt.event.KeyEvent e) {
+				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_UP) {
+					camera.setLook(0.0f, angleY);
+					angleY += 1.0f;
+				}
+			}
+		});
+
+		// key listener for down arrow to rotate camera right
+		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
+			public void keyPressed(java.awt.event.KeyEvent e) {
+				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_DOWN) {
+					camera.setLook(0.0f, angleY);
+					angleY -= 1.0f;
+				}
+			}
+		});
+
+		// key listener for left arrow to rotate camera left
+		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
+			public void keyPressed(java.awt.event.KeyEvent e) {
+				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_LEFT) {
+					camera.setLook(angleX, 0.0f);
+					angleX += 1.0f;
+				}
+			}
+		});
+
+		// key listener for right arrow to rotate camera right
+		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
+			public void keyPressed(java.awt.event.KeyEvent e) {
+				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_RIGHT) {
+					camera.setLook(angleX, 0.0f);
+					angleX -= 1.0f;
+				}
+			}
+		});
 
 		// // create animator
 		Animator animator = new Animator(myCanvas);
@@ -85,8 +206,8 @@ public class Code extends JFrame implements GLEventListener {
 		aspect = (float) myCanvas.getWidth() / (float) myCanvas.getHeight();
 		pMat.setPerspective((float) Math.toRadians(60.0f), aspect, 0.1f, 1000.0f);
 
-		vMat.translation(-cameraX, -cameraY, -cameraZ);
-
+		// camera position
+		vMat = camera.getViewMatrix();
 		// draw the cube using buffer #0
 
 		mMat.translation(cubeLocX, cubeLocY, cubeLocZ);
@@ -99,8 +220,8 @@ public class Code extends JFrame implements GLEventListener {
 		mMat.scale(0.6f, 0.6f, 0.6f);
 
 		// make square that a circular path around the origin
-		mMat.translate((float) Math.sin(tf * 1.2 * Math.PI) * 10.0f, 0.0f,
-				(float) Math.cos(tf * 1.2 * Math.PI) * 15.0f);
+		mMat.translate((float) Math.sin(tf * 0.8 * Math.PI) * 10.0f, 0.0f,
+				(float) Math.cos(tf * 0.8 * Math.PI) * 15.0f);
 		// rock the square back and forth
 		mMat.rotateY((float) Math.toRadians(45.0f * tf));
 
@@ -220,7 +341,7 @@ public class Code extends JFrame implements GLEventListener {
 		gl.glDrawArrays(GL_TRIANGLES, 0, myTreeModel.getNumVertices());
 
 		// print out the elapsed time
-		System.out.println(elapsedTime);
+		// System.out.println(elapsedTime);
 
 	}
 
@@ -239,7 +360,7 @@ public class Code extends JFrame implements GLEventListener {
 		setupVertices();
 		cameraX = 0.0f;
 		cameraY = 3.0f;
-		cameraZ = 15.0f;
+		cameraZ = 18.0f;
 
 		cubeLocX = 0.0f;
 		cubeLocY = 2.3f;
@@ -254,16 +375,16 @@ public class Code extends JFrame implements GLEventListener {
 		cowLocZ = 0.0f;
 
 		// tree vertices
-		treeLocX = 3.0f;
+		treeLocX = 5.0f;
 		treeLocY = 0.0f;
-		treeLocZ = -6.0f;
+		treeLocZ = 8.0f;
 
 		// texture for tree
 		cowTexture = Utils.loadTexture("furCow.jpg");
 		genTexture = Utils.loadTexture("green.jpg");
 		tetraTexture = Utils.loadTexture("brick1.jpg");
 		cubeTexture = Utils.loadTexture("alien.jpg");
-		treeTexture = Utils.loadTexture("tree.jpg");
+		treeTexture = Utils.loadTexture("tree4.jpg");
 	}
 
 	private void setupVertices() {
@@ -284,18 +405,17 @@ public class Code extends JFrame implements GLEventListener {
 
 		// texture coords for cube
 		float[] cubeTexCoords = { 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			
-	
+				0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+				0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
 		};
 
 		// vertice postions for triangular pyramid
@@ -369,13 +489,13 @@ public class Code extends JFrame implements GLEventListener {
 		gl.glGenVertexArrays(vao.length, vao, 0);
 		gl.glBindVertexArray(vao[0]);
 		gl.glGenBuffers(vbo.length, vbo, 0);
-		//cube vertices
+		// cube vertices
 		//
 		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 		FloatBuffer cubeBuf = Buffers.newDirectFloatBuffer(
 				cubePositions);
 		gl.glBufferData(GL_ARRAY_BUFFER, cubeBuf.limit() * 4, cubeBuf, GL_STATIC_DRAW);
-		//cube tex coords
+		// cube tex coords
 		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 		FloatBuffer cubeTexBuf = Buffers.newDirectFloatBuffer(
 				cubeTexCoords);
@@ -410,7 +530,6 @@ public class Code extends JFrame implements GLEventListener {
 				nvalues);
 		gl.glBufferData(GL_ARRAY_BUFFER, normBuf.limit() * 4, normBuf, GL_STATIC_DRAW);
 
-
 		// set up tree vertices
 		//
 		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[7]);
@@ -428,6 +547,9 @@ public class Code extends JFrame implements GLEventListener {
 				treeNvalues);
 		gl.glBufferData(GL_ARRAY_BUFFER, treeNormBuf.limit() * 4, treeNormBuf, GL_STATIC_DRAW);
 
+		// rotate the camera left
+		//
+
 	}
 
 	public static void main(String[] args) {
@@ -440,4 +562,13 @@ public class Code extends JFrame implements GLEventListener {
 
 	public void dispose(GLAutoDrawable drawable) {
 	}
+
+	// camera movements
+	//
+
+	// move the camera coords in the N direction
+	public void closerMoveCameraN() {
+
+	}
+
 }
