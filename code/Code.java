@@ -70,8 +70,8 @@ public class Code extends JFrame implements GLEventListener {
 	private int vIncrementation = 10;
 
 	// camera speed
-	private float angleY = 0.3f;
-	private float angleX = 0.3f;
+	private float angleY = 0.1f;
+	private float angleX = 0.1f;
 
 	// camera rotations
 	private float cameraRotation = 4.0f;
@@ -81,8 +81,15 @@ public class Code extends JFrame implements GLEventListener {
 
 	// new camera object
 	private FirstPersonCamera camera = new FirstPersonCamera(0.0f, 0.0f, 18.0f);
+	//movement for camera
+	private float cameraMovement = 0.6f;
+	private float movX = 0.3f;
+	private float movY = 0.3f;
+	private float movZ = 0.3f;
 
-	private float cameraMovement = 0.3f;
+	//rotation and pitch fixes
+	private float rotationFix = 0.0f;
+	private float pitchFix = 0.0f;
 
 	public Code() {
 		setTitle("Chapter 4 - program 3");
@@ -98,7 +105,7 @@ public class Code extends JFrame implements GLEventListener {
 		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
 			public void keyPressed(java.awt.event.KeyEvent e) {
 				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_W) {
-					camera.translate(0.0f, 0.0f, -cameraMovement);
+					camera.translate(-rotationFix, pitchFix, -cameraMovement);
 				}
 			}
 		});
@@ -107,7 +114,7 @@ public class Code extends JFrame implements GLEventListener {
 		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
 			public void keyPressed(java.awt.event.KeyEvent e) {
 				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_S) {
-					camera.translate(0.0f, 0.0f, cameraMovement);
+					camera.translate(rotationFix, pitchFix, cameraMovement);
 				}
 			}
 		});
@@ -116,7 +123,7 @@ public class Code extends JFrame implements GLEventListener {
 		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
 			public void keyPressed(java.awt.event.KeyEvent e) {
 				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_A) {
-					camera.translate(-cameraMovement, 0.0f, 0.0f);
+					camera.translate(-cameraMovement-rotationFix, pitchFix, 0.0f);
 				}
 			}
 		});
@@ -125,7 +132,7 @@ public class Code extends JFrame implements GLEventListener {
 		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
 			public void keyPressed(java.awt.event.KeyEvent e) {
 				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_D) {
-					camera.translate(cameraMovement, 0.0f, 0.0f);
+					camera.translate(cameraMovement+rotationFix, pitchFix, 0.0f);
 				}
 			}
 		});
@@ -134,7 +141,7 @@ public class Code extends JFrame implements GLEventListener {
 		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
 			public void keyPressed(java.awt.event.KeyEvent e) {
 				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_E) {
-					camera.translate(0.0f, cameraMovement, 0.0f);
+					camera.translate(0.0f, cameraMovement+pitchFix, 0.0f);
 				}
 			}
 		});
@@ -143,7 +150,7 @@ public class Code extends JFrame implements GLEventListener {
 		myCanvas.addKeyListener(new java.awt.event.KeyAdapter() {
 			public void keyPressed(java.awt.event.KeyEvent e) {
 				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_Q) {
-					camera.translate(0.0f, -cameraMovement, 0.0f);
+					camera.translate(0.0f, -cameraMovement-pitchFix, 0.0f);
 				}
 			}
 		});
@@ -153,7 +160,8 @@ public class Code extends JFrame implements GLEventListener {
 			public void keyPressed(java.awt.event.KeyEvent e) {
 				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_UP) {
 					camera.setLook(0.0f, angleY);
-					angleY += 1.0f;
+					angleY += 3.0f;
+					pitchFix = (float) Math.sin(Math.toRadians(angleY % 360));
 				}
 			}
 		});
@@ -163,7 +171,8 @@ public class Code extends JFrame implements GLEventListener {
 			public void keyPressed(java.awt.event.KeyEvent e) {
 				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_DOWN) {
 					camera.setLook(0.0f, angleY);
-					angleY -= 1.0f;
+					angleY -= 3.0f;
+					pitchFix = (float) Math.sin(Math.toRadians(angleY % 360));
 				}
 			}
 		});
@@ -173,7 +182,8 @@ public class Code extends JFrame implements GLEventListener {
 			public void keyPressed(java.awt.event.KeyEvent e) {
 				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_LEFT) {
 					camera.setLook(angleX, 0.0f);
-					angleX += 1.0f;
+					angleX += 3.0f;
+					rotationFix = (float) Math.sin(Math.toRadians(angleX % 360));
 				}
 			}
 		});
@@ -183,7 +193,8 @@ public class Code extends JFrame implements GLEventListener {
 			public void keyPressed(java.awt.event.KeyEvent e) {
 				if (e.getKeyCode() == java.awt.event.KeyEvent.VK_RIGHT) {
 					camera.setLook(angleX, 0.0f);
-					angleX -= 1.0f;
+					angleX -= 3.0f;
+					rotationFix = (float) Math.sin(Math.toRadians(angleX % 360));
 				}
 			}
 		});
@@ -278,8 +289,10 @@ public class Code extends JFrame implements GLEventListener {
 
 		gl.glActiveTexture(GL_TEXTURE0);
 		gl.glBindTexture(GL_TEXTURE_2D, tetraTexture);
+		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 		gl.glUniform1i(gl.glGetUniformLocation(renderingProgram, "texture0"), 0);
-		// gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		
 
 		gl.glEnable(GL_DEPTH_TEST);
 		gl.glDepthFunc(GL_LEQUAL);
@@ -426,10 +439,10 @@ public class Code extends JFrame implements GLEventListener {
 		};
 
 		// texture coordinates for pyramid
-		float[] tetrahedronTexCoords = { 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // front
-				0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right
-				0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // left
-				0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f // bottom
+		float[] tetrahedronTexCoords = { 0.0f, 3.0f, 0.0f, 0.0f, 3.0f, 0.0f, // front
+				0.0f, 3.0f, 3.0f, 0.0f, 0.0f, 0.0f, // right
+				0.0f, 3.0f, 0.0f, 0.0f, 3.0f, 0.0f, // left
+				0.0f, 3.0f, 3.0f, 0.0f, 0.0f, 0.0f // bottom
 		};
 
 		// float[] tetrahedronPositions = { 0.0f, 1.0f, 0.0f, -1.0f, -1.0f, 1.0f, 1.0f,
@@ -441,6 +454,13 @@ public class Code extends JFrame implements GLEventListener {
 
 		// set up cow vertices
 		//
+
+		//coordinates for coord axes
+		float[] coordAxesPositions = { 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, // x axis
+				0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, // y axis
+				0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f // z axis
+		};
+
 		numObjVertices = myModel.getNumVertices();
 
 		Vector3f[] vertices = myModel.getVertices();
