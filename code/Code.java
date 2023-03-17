@@ -1,7 +1,6 @@
 package code;
 
 import code.FirstPersonCamera.*;
-import code.Camera3D.*;
 
 import java.nio.*;
 import javax.swing.*;
@@ -75,9 +74,6 @@ public class Code extends JFrame implements GLEventListener {
 
 	// camera rotations
 	private float cameraRotation = 4.0f;
-
-	// camera3D object
-	private Camera3D camera2;
 
 	// new camera object
 	private FirstPersonCamera camera = new FirstPersonCamera(0.0f, 0.0f, 18.0f);
